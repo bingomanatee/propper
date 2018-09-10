@@ -1,3 +1,4 @@
+/* eslint-disable babel/new-cap */
 import propper from './../src/index';
 
 describe('Propper', () => {

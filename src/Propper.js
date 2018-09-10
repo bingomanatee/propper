@@ -1,13 +1,32 @@
-const NAME_REGEX = /^[\w$]+$/;
+import is from 'is';
+import l_get from 'lodash.get';
 
-const LOCAL_PROP_DEFAULTS = {
-  configurable: false,
-  enumerable: false,
-};
+const NAME_REGEX = /^[\w$]+$/;
 
 const PROP_DEFAULTS = {
   configurable: false,
   enumerable: true,
+};
+
+const GENERIC_FAIL_MSG = '(#name#) bad value #value#';
+
+const failMessage = (msg, name, value) => {
+  if (!msg) return failMessage(GENERIC_FAIL_MSG, name, value);
+  if (is.function(msg)) {
+    return msg(name, value);
+  }
+  if (/#name#/.test(msg)) {
+    return msg.replace(/#name#/gi, name)
+      .replace(/#value#/gi, value);
+  }
+
+  let out;
+  try {
+    out = `(${name}) ${msg} ${value}`;
+  } catch (err) {
+    out = `(${name}) ${msg}`;
+  }
+  return out;
 };
 
 export default class Propper {
@@ -21,7 +40,13 @@ export default class Propper {
   }
 
   addProp(name, overrides = {}) {
-    if (!(name && typeof name === 'string')) throw new Error('property must be a string');
+    let localName = null;
+    let filter = null;
+    let onFilterFail = Propper.ON_FAIL_THROW;
+    let filterFailMessage = null;
+    if (!(name && typeof name === 'string')) {
+      throw new Error('property must be a string');
+    }
     if (!NAME_REGEX.test(name)) {
       if (!overrides.wierdName) {
         throw new Error(`the property name ${name
@@ -43,8 +68,24 @@ export default class Propper {
       delete overrides.value;
     }
 
+    if (Reflect.has(overrides, 'filter')) {
+      filter = overrides.filter;
+      filterFailMessage = overrides.filterFailMessage;
+
+      if (is.string(filter)) {
+        filter = l_get(is, filter);
+      }
+      if (!is.function(filter)) throw new Error('non function filter passed');
+      if (Reflect.has(overrides, 'onFilterFail')) {
+        onFilterFail = overrides.onFilterFail;
+        delete overrides.onFiltrerFail;
+      }
+      delete overrides.filter;
+      delete overrides.filterFailMessage;
+    }
+
     // optionally the initial value is set with a function to ensure unique references
-    let localName = overrides.localName;
+    localName = overrides.localName;
     delete overrides.localName;
     if (!localName) {
       localName = `_${name}`;
@@ -54,13 +95,23 @@ export default class Propper {
 
     Object.defineProperty(this.classDef.prototype, name, Object.assign(
       definition,
-      this.baseGetterSetter(localName, defaultFactory)
+      this.baseGetterSetter(name, localName, {
+        defaultFactory,
+        filter,
+        onFilterFail,
+        filterFailMessage,
+      }),
     ));
 
     return this;
   }
 
-  baseGetterSetter(localName, defaultFactory) {
+  baseGetterSetter(name, localName, {
+    defaultFactory,
+    filter,
+    onFilterFail = Propper.ON_FAIL_THROW,
+    filterFailMessage,
+  }) {
     return {
       get() {
         if (this[localName] === undefined) {
@@ -69,8 +120,35 @@ export default class Propper {
         return this[localName];
       },
       set(value) {
-        this[localName] = value;
+        if (filter) {
+          if (!filter(value)) {
+            switch (onFilterFail) {
+              case Propper.ON_FAIL_THROW:
+                throw new Error(failMessage(filterFailMessage, name, value));
+                // eslint-disable-next-line no-unreachable
+                break;
+
+              case Propper.ON_FAIL_CONSOLE:
+                console.log(failMessage(filterFailMessage, name, value), value);
+                break;
+
+              case Propper.ON_FAIL_SILENT:
+                break;
+
+              default:
+                throw new Error(failMessage(filterFailMessage, name, value));
+            }
+          } else {
+            this[localName] = value;
+          }
+        } else {
+          this[localName] = value;
+        }
       },
     };
   }
 }
+
+Propper.ON_FAIL_THROW = Symbol('ON_FAIL_THROW');
+Propper.ON_FAIL_CONSOLE = Symbol('ON_FAIL_CONSOLE');
+Propper.ON_FAIL_SILENT = Symbol('ON_FAIL_SILENT');
