@@ -36,7 +36,7 @@ describe('Propper', () => {
     it('should reflect an initial value', () => {
       const myPropper = propper(classDef);
 
-      myPropper.addProp('foo', { value: 1 });
+      myPropper.addProp('foo', { defaultValue: 1 });
       const instance = new classDef();
 
       expect(instance.foo).toEqual(1);
@@ -49,7 +49,7 @@ describe('Propper', () => {
     it('should accept an initial value factory', () => {
       const myPropper = propper(classDef);
 
-      myPropper.addProp('foo', { value: () => [1, 2] });
+      myPropper.addProp('foo', { defaultValue: () => [1, 2] });
       const instance = new classDef();
 
       expect(instance.foo).toEqual([1, 2]);

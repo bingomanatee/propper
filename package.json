@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "is": "^3.2.1",
+    "lodash.compact": "^3.0.1",
     "lodash.get": "^4.4.2"
   }
 }

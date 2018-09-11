@@ -18,7 +18,8 @@ describe('Propper', () => {
       beforeEach(() => {
         const myPropper = propper(classDef);
         myPropper.addProp('foo', {
-          filter: value => value > 2,
+          test: value => value <= 2,
+          errorMessage: '#name# passed value <= 2 (#value#)',
         });
         instance = new classDef();
       });
@@ -28,7 +29,7 @@ describe('Propper', () => {
         try {
           instance.foo = 2;
         } catch (err) {
-          expect(err.message).toEqual('(foo) bad value 2');
+          expect(err.message).toEqual('foo passed value <= 2 (2)');
         }
       });
 
@@ -37,7 +38,7 @@ describe('Propper', () => {
         try {
           instance.foo = 3;
         } catch (err) {
-          expect(err.message).toEqual('(foo) bad value 2');
+          expect(err.message).toEqual('foo passed value <= 2 (3)');
         }
       });
     });
@@ -49,7 +50,7 @@ describe('Propper', () => {
     beforeEach(() => {
       const myPropper = propper(classDef);
       myPropper.addProp('foo', {
-        filter: 'date',
+        test: 'date', errorMessage: 'foo must be a date',
       });
       instance = new classDef();
     });
@@ -60,7 +61,7 @@ describe('Propper', () => {
       try {
         instance.foo = new Date();
       } catch (err) {
-        expect(err.message).toEqual('(foo) bad value 2');
+        expect(err.message).toEqual('foo must be a date');
       }
     });
 
@@ -70,7 +71,7 @@ describe('Propper', () => {
       try {
         instance.foo = 2;
       } catch (err) {
-        expect(err.message).toEqual('(foo) bad value 2');
+        expect(err.message).toEqual('foo must be a date');
       }
     });
   });
