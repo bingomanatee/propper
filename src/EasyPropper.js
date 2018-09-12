@@ -21,10 +21,10 @@ export default (classDef) => {
         if (ADD_RE.test(name)) {
           const match = ADD_RE.exec(name);
           const testName = match[1].toLowerCase();
-          const test = (v) => !is[testName](v);
+          const failsWhen = v => !is[testName](v);
           target[name] = function dynamicAddProp(propName, options) {
             if (!options) options = {};
-            options.test = test;
+            options.failsWhen = failsWhen;
             return this.addProp(propName, options);
           };
         }

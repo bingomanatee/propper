@@ -6,7 +6,7 @@ describe('Propper', () => {
     const NON_INT_ERROR = 'value must be integer';
     let integerValidator;
     beforeEach(() => {
-      integerValidator = new Validator(is.integer, NON_INT_ERROR).reverseTest();
+      integerValidator = new Validator(n => !Number.isInteger(n), NON_INT_ERROR);
     });
     describe('simple', () => {
       it('should return nothing when given an integer', () => {
@@ -26,15 +26,30 @@ describe('Propper', () => {
         compoundTest = new Validator([integerValidator, nonNegValidator]);
       });
 
-      it('should have a good not negative test', () => {
+      it('should have a good not negative failsWhen', () => {
         expect(nonNegValidator.try(2)).toBeFalsy();
         expect(nonNegValidator.try(-2)).toBeTruthy();
       });
 
-      it('should validate both conditions in compound test', () => {
+      it('should validate both conditions in compound failsWhen', () => {
         expect(compoundTest.try(2)).toBeFalsy();
         expect(compoundTest.try('two')).toEqual(NON_INT_ERROR);
         expect(compoundTest.try(-2)).toEqual(NOT_NEGATIVE_ERROR);
+      });
+    });
+
+    describe('is/string tests', () => {
+      let stringValidator;
+      beforeEach(() => {
+        stringValidator = new Validator('string', 'value must be a string');
+      });
+
+      it('passes string', () => {
+        expect(stringValidator.try('a string')).toBeFalsy();
+      });
+
+      it('fails a number', () => {
+        expect(stringValidator.try(2)).toEqual('value must be a string');
       });
     });
   });

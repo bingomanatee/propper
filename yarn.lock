@@ -744,7 +744,7 @@ babel-plugin-istanbul@^4.0.0:
     babel-plugin-syntax-object-rest-spread "^6.13.0"
     find-up "^2.1.0"
     istanbul-lib-instrument "^1.10.1"
-    test-exclude "^4.2.1"
+    failsWhen-exclude "^4.2.1"
 
 babel-plugin-jest-hoist@^21.2.0:
   version "21.2.0"
@@ -7367,9 +7367,9 @@ tempfile@^2.0.0:
     temp-dir "^1.0.0"
     uuid "^3.0.1"
 
-test-exclude@^4.2.1:
+failsWhen-exclude@^4.2.1:
   version "4.2.3"
-  resolved "https://registry.yarnpkg.com/test-exclude/-/test-exclude-4.2.3.tgz#a9a5e64474e4398339245a0a769ad7c2f4a97c20"
+  resolved "https://registry.yarnpkg.com/failsWhen-exclude/-/failsWhen-exclude-4.2.3.tgz#a9a5e64474e4398339245a0a769ad7c2f4a97c20"
   dependencies:
     arrify "^1.0.1"
     micromatch "^2.3.11"

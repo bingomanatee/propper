@@ -22,7 +22,7 @@ describe('Propper', () => {
 
   describe('addProp', () => {
     it('should add a writable property to a class', () => {
-      // not much of a test - just making sure no explosions
+      // not much of a failsWhen - just making sure no explosions
 
       const myPropper = propper(classDef);
 
@@ -31,6 +31,25 @@ describe('Propper', () => {
       instance.foo = 2;
 
       expect(instance.foo).toEqual(2);
+    });
+
+    it('should accept a required flag', () => {
+      expect.assertions(2);
+      const myPropper = propper(classDef);
+
+      myPropper.addProp('foo', { required: true });
+      myPropper.addProp('bar', { required: true });
+
+      const instance = new classDef();
+      instance.foo = 2;
+
+      expect(instance.foo).toEqual(2);
+
+      try {
+        instance.bar = null;
+      } catch (err) {
+        expect(err.message).toEqual('bar is required');
+      }
     });
 
     it('should reflect an initial value', () => {

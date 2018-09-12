@@ -1,5 +1,4 @@
 import is from 'is';
-// import l_get from 'lodash.get';
 
 import Validator from './Validator';
 
@@ -20,10 +19,16 @@ const defaultOnBadData = (name, value, error) => {
 };
 
 const getOff = (obj, field, def) => {
-  const out = obj[field];
-  delete obj[field];
-  return out || def;
+  if (Reflect.has(obj, field)) {
+    const out = obj[field];
+    delete obj[field];
+    return out;
+  }
+  return def;
 };
+
+const stringValidator = name => new Validator('string', `${name} must be a string`).setName('stringValidator');
+const requiredValidator = name => new Validator(a => !a, `${name} is required`).setName('requiredValidator');
 
 export default class Propper {
   constructor(ClassDef, options = {}) {
@@ -35,11 +40,108 @@ export default class Propper {
     return 'PROPPER';
   }
 
+  /**
+   * this adds an 'isValid()' method and an 'propErrors()' method.
+   * isValid() returns true or false; propErrors() returns an array
+   * of prop/error objects, or null if there are no errors.
+   *
+   * NOTE: the only properties that will be tested are those defined AFTER
+   * addIsValid() is called. So you can't call it at the last minute
+   * and expect it to work!
+   *
+   * @param validMethodName
+   * @param propErrors
+   * @returns {*}
+   */
+  addIsValid(validMethodName = 'isValid', propErrors = 'propErrors', validatorRegistry = '__validators') {
+    Object.assign(this, {
+      validMethodName, propErrors, validatorRegistry,
+    });
+
+    if (!Reflect.has(this.classDef.prototype)) {
+      Object.defineProperty(this.classDef.prototype, validatorRegistry, {
+        configurable: false,
+        enumerable: false,
+        get() {
+          if (!this[`${validatorRegistry}_`]) {
+            this[`${validatorRegistry}_`] = new Map();
+          }
+          return this[`${validatorRegistry}_`];
+        },
+      });
+
+      Object.defineProperty(this.classDef.prototype, validMethodName, {
+        configurable: false,
+        enumerable: false,
+        get() {
+          if (this[propErrors]) {
+            return false;
+          } return true;
+        },
+      });
+
+      Object.defineProperty(this.classDef.prototype, propErrors, {
+        configurable: false,
+        enumerable: false,
+        get() {
+          const errors = [];
+          Array.from(this[validatorRegistry].keys()).forEach((prop) => {
+            const value = this[prop];
+            const validator = this[validatorRegistry].get(prop);
+            const error = validator.try(value);
+            if (error) {
+              errors.push({ prop, error });
+            }
+          });
+          if (errors.length) return errors;
+          return null;
+        },
+      });
+    }
+    return this;
+  }
+
   withValidator(...args) {
     if (args[0] instanceof Validator) {
       this._validator = args[0];
     }
     this._validator = new Validator(...args);
+  }
+
+  addString(name, overrides = {}) {
+    let regexValidator;
+    const regex = getOff(overrides, 'regex');
+    const min = getOff(overrides, 'min', null);
+    const max = getOff(overrides, 'max', null);
+    let minValidator;
+    let maxValidator;
+    const regexErrorMessage = getOff(overrides, 'regexErrorMessage', 'Bad string pattern');
+    if (regex) regexValidator = new Validator(value => !regex.test(value), regexErrorMessage);
+    const failsWhen = getOff(overrides, 'failsWhen');
+    if (!is.null(min)) {
+      minValidator = new Validator(
+        str => str.length < min,
+        `"#value#" too short; ${name} must be at least ${min} characters`,
+      );
+    }
+    if (!is.null(max)) {
+      maxValidator = new Validator(
+        str => str.length > max,
+        `#value# too long; ${name} cannot be longer than ${max} characters`,
+      );
+    }
+
+    if (!Reflect.has(overrides, 'defaultValue')) overrides.defaultValue = '';
+
+    overrides.failsWhen = Validator.compound(
+      stringValidator(name),
+      regexValidator,
+      minValidator,
+      maxValidator,
+      failsWhen,
+    );
+
+    return this.addProp(name, overrides);
   }
 
   addProp(name, overrides = {}) {
@@ -54,18 +156,25 @@ export default class Propper {
       validator = this._validator;
       // @TODO: scrub local?
     }
-    const test = getOff(definition, 'test');
+    const failsWhen = getOff(definition, 'failsWhen');
     const errorMessage = getOff(definition, 'errorMessage', GENERIC_FAIL_MSG).replace('#name#', name);
     const onBadData = getOff(definition, 'onBadData', defaultOnBadData);
     const defaultValue = getOff(definition, 'defaultValue', null);
+    const required = getOff(definition, 'required');
+
     let getDefault = () => defaultValue;
     if (is.function(defaultValue)) {
       getDefault = defaultValue;
     }
 
-    if (test) {
-      const oValidator = new Validator(test, errorMessage);
-      validator = Validator.compound(validator, oValidator);
+    if (failsWhen) {
+      if (failsWhen instanceof Validator) validator = failsWhen;
+      else if (Array.isArray(failsWhen)) {
+        validator = Validator.compound(failsWhen);
+      } else {
+        const oValidator = new Validator(failsWhen, errorMessage);
+        validator = Validator.compound(validator, oValidator);
+      }
     }
 
     Object.assign(definition, {
@@ -76,6 +185,15 @@ export default class Propper {
         return this[localName];
       },
     });
+
+    if (required) {
+      const rv = requiredValidator(name);
+      try {
+        validator = Validator.compound(validator, rv);
+      } catch (err) {
+        console.log('bad validator attempt:', rv, validator, this, overrides);
+      }
+    }
 
     if (validator) {
       // console.log('with validator');
@@ -90,6 +208,10 @@ export default class Propper {
           }
         },
       });
+
+      if (this.validatorRegistry) {
+        this.classDef.prototype[this.validatorRegistry].set(name, validator);
+      }
     } else {
       //    console.log('no validator');
       Object.assign(definition, {
