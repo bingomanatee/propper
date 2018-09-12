@@ -18,7 +18,7 @@ const defaultOnBadData = (name, value, error) => {
   throw new Error(GENERIC_FAIL_MSG.replace('#name#', name).replace('#value#', value));
 };
 
-const getOff = (obj, field, def) => {
+const popObject = (obj, field, def) => {
   if (Reflect.has(obj, field)) {
     const out = obj[field];
     delete obj[field];
@@ -76,7 +76,8 @@ export default class Propper {
         get() {
           if (this[propErrors]) {
             return false;
-          } return true;
+          }
+          return true;
         },
       });
 
@@ -93,7 +94,9 @@ export default class Propper {
               errors.push({ prop, error });
             }
           });
-          if (errors.length) return errors;
+          if (errors.length) {
+            return errors;
+          }
           return null;
         },
       });
@@ -110,14 +113,16 @@ export default class Propper {
 
   addString(name, overrides = {}) {
     let regexValidator;
-    const regex = getOff(overrides, 'regex');
-    const min = getOff(overrides, 'min', null);
-    const max = getOff(overrides, 'max', null);
+    const regex = popObject(overrides, 'regex');
+    const min = popObject(overrides, 'min', null);
+    const max = popObject(overrides, 'max', null);
     let minValidator;
     let maxValidator;
-    const regexErrorMessage = getOff(overrides, 'regexErrorMessage', 'Bad string pattern');
-    if (regex) regexValidator = new Validator(value => !regex.test(value), regexErrorMessage);
-    const failsWhen = getOff(overrides, 'failsWhen');
+    const regexErrorMessage = popObject(overrides, 'regexErrorMessage', 'Bad string pattern');
+    if (regex) {
+      regexValidator = new Validator(value => !regex.test(value), regexErrorMessage);
+    }
+    const failsWhen = popObject(overrides, 'failsWhen');
     if (!is.null(min)) {
       minValidator = new Validator(
         str => str.length < min,
@@ -131,7 +136,9 @@ export default class Propper {
       );
     }
 
-    if (!Reflect.has(overrides, 'defaultValue')) overrides.defaultValue = '';
+    if (!Reflect.has(overrides, 'defaultValue')) {
+      overrides.defaultValue = '';
+    }
 
     overrides.failsWhen = Validator.compound(
       stringValidator(name),
@@ -149,18 +156,15 @@ export default class Propper {
 
     const definition = Object.assign({}, options);
     // optionally the initial value is set with a function to ensure unique references
-    localName = getOff(definition, 'localName', `_${name}`);
+    localName = popObject(definition, 'localName', `_${name}`);
 
-    let validator;
-    if (this._validator) {
-      validator = this._validator;
-      // @TODO: scrub local?
-    }
-    const failsWhen = getOff(definition, 'failsWhen');
-    const errorMessage = getOff(definition, 'errorMessage', GENERIC_FAIL_MSG).replace('#name#', name);
-    const onBadData = getOff(definition, 'onBadData', defaultOnBadData);
-    const defaultValue = getOff(definition, 'defaultValue', null);
-    const required = getOff(definition, 'required');
+    let validator = this._validator;
+
+    const failsWhen = popObject(definition, 'failsWhen');
+    const errorMessage = popObject(definition, 'errorMessage', GENERIC_FAIL_MSG).replace('#name#', name);
+    const onBadData = popObject(definition, 'onBadData', defaultOnBadData);
+    const defaultValue = popObject(definition, 'defaultValue', null);
+    const required = popObject(definition, 'required');
 
     let getDefault = () => defaultValue;
     if (is.function(defaultValue)) {
@@ -168,12 +172,10 @@ export default class Propper {
     }
 
     if (failsWhen) {
-      if (failsWhen instanceof Validator) validator = failsWhen;
-      else if (Array.isArray(failsWhen)) {
-        validator = Validator.compound(failsWhen);
+      if (Array.isArray(failsWhen) || failsWhen instanceof Validator) {
+        validator = Validator.compound(validator, failsWhen);
       } else {
-        const oValidator = new Validator(failsWhen, errorMessage);
-        validator = Validator.compound(validator, oValidator);
+        validator = Validator.compound(validator, new Validator(failsWhen, errorMessage));
       }
     }
 

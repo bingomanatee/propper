@@ -147,7 +147,6 @@ let v = new Validator((d) => {
 
 Or through compounding:
 
-
 ```javascript
 
 let v = new Validator([
