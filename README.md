@@ -11,7 +11,7 @@ meta-methods.
 
 The basic workflow is this:
 
-1. __Define a class__
+1. `Define a class`
 
 Your class (es6) can have any sort of constructor, properties, methods, etc. 
 
@@ -56,7 +56,8 @@ Now, instances of UserRecord will have formal field definitions and criteria:
 
 ```javascript
 
-let user = new UserRecord({name: 'Bob', phone: '111-222-3333', email: 'bob@gmail.com', birthday: new Date(1966, 11,2)});
+let user = new UserRecord({name: 'Bob', phone: '111-222-3333', 
+email: 'bob@gmail.com', birthday: new Date(1966, 11,2)});
 
 ```
 
@@ -72,8 +73,39 @@ try {
 
 ```
 
+
 The amount of boilerplate this requires in long-form JS is many times this with no real 
 added value (and room for errors.)
+
+## `addProp(propName, options = {})` and `addString(propName, options={})`
+
+addProp adds a property to the prototype of the class you are wrapping. 
+The value of options will be used in the `Object.defineProperty(name, options)` 
+call except for the Propper-specific values: 
+
+These properties define the validation requirement of the field, and how invalid data is handled:
+They are all optional. 
+
+* __failsWhen__
+* __errorMessage__ 
+* __onBadData__
+* __required__
+
+These do other things:
+
+* __defaultValue__
+* __localName__
+
+`addString(name, options)` is the same as addProp but adds a string validator as well
+as a few more optional validations specific to strings. 
+These are used in addString a variant of addProp
+
+* __regex__
+* __regexErrorMessage__
+* __min__
+* __max__
+
+These methods are chainable.
 
 ## A note on default values
 
@@ -86,15 +118,15 @@ the class designer's responsibility to either (a) set a default that is valid or
 Validation is at the core of this library. Each property that has tests is assigned a validator 
 instance. Validators have three properties:
 
-* __failsWhen__: a function OR an array of validators
-* __defaultError__: a string that is emitted when the failsWhen succeeds
-* __errors__: an optional hash of responses to specific emissions from __failsWhen__
+* `failsWhen`: a function, validator, string (name of `is` method) OR an array of same.
+* `defaultError`: a string that is emitted when the failsWhen succeeds
+* `errors` (optional): an optional hash of responses to specific emissions from `failsWhen`
 
 Eventually you'll want to execute multiple tests on the same property. There are two ways to do this:
 
-1. Create a __failsWhen__ that has multiple tests inside it and emits keys 
-   that have analogs in the __errors__ property
-2. create a validator whose __failsWhen__ is an array of single validators. 
+1. Create a `failsWhen` that has multiple tests inside it and emits keys 
+   that have analogs in the `errors` property
+2. create a validator whose `failsWhen` is an array of single validators. 
 
 ### Example:
 
@@ -146,13 +178,13 @@ A few things to note:
 ## Validators in practice
 
 addProp's `options` parameter has two properties for setting the validation criteria of 
-a property: __failsWhen__ and __errorMessage__.
+a property: `failsWhen` and `errorMessage`.
 
-* if __failsWhen__ is a validator, __errorMessage__ is ignored. 
+* if `failsWhen` is a validator, `errorMessage` is ignored. 
 * if it is a _function_ or an _array_ (of functions or validators) a validator is created
-  using __failsWhen__ and __errorMessage__ as the arguments to the new Validator. 
+  using `failsWhen` and `errorMessage` as the arguments to the new Validator. 
 
-## And the hits keep on coming
+## "Magic" props with implicit validation
 
 An experimental variant of propper is `EasyPropper`. It uses Proxy which is not avialable
 on every platform so use with caution. What it does do is let you define tests "Magically".
@@ -201,9 +233,8 @@ instance.created = new Date();
 instance.age = 'one'; // fails because not an integer.
 
 ```
-... but its quicker and more semantic.
 
-Just to reiterate that this is equivalent to 
+or ...
 
 ```javascript
 
@@ -224,6 +255,9 @@ instance.created = new Date();
 instance.age = 'one'; // fails because not an integer.
 
 ```
+... but its quicker and more semantic. You can add any options you want 
+to "magic" methods, even further validators, 
+which will execute after the magic validator implicit in the method. 
 
 ## Reflection: isValid and propErrors
 
@@ -231,7 +265,7 @@ You can also poll the condition of the class as a whole and get errors just as y
 activeRecord instances. 
 
 when you prepare your propper with `propper(BaseClass).addIsValid()`, it adds two methods, 
-__propErrors__ and __isValid__. They are properties, not methods/functions. 
+`propErrors` and `isValid`. They are properties, not methods/functions. 
 
 ### isValid
 
@@ -246,6 +280,42 @@ objects that tell you which specific fields are bad (and why). If none are, it r
 Note - `addIsValid()` must be called BEFORE addProps or you will lose track of 
 some of the validators. 
 
+## Preloading Validator and onBadData
+
+If you have a series of properties with identical validators you can set them at the Propper 
+level (ha!); note, you have to clear them at the end or they carry through. 
+
+```javascript
+
+class UserRecord {}
+const userPropper = propper(UserRecord);
+
+userPropper
+.withValidator(new Validator((n) => (Number.isNumber(n) && n >= 0).reverseTest()))
+.addInteger('age')
+.addInteger('children')
+.addInteger('income')
+.clearValidator()
+addString('address')
+.addString('phone', {required: true})
+.addString('email', {regex: /^(.*@.*\.[\w]+$/,
+ regexMessage: '#name# must be a proper email value'})
+.addProp('age', {filter: 'integer'})
+.addProp('birthday', {filter: 'date'});
+
+```
+
+## Handling validation errors
+
+There may be reasons not to throw an error; if you want to handle bad data in a custom way,
+add an `onBadData` method; it will receive the name of the field, the value attempted, 
+and the error message. The field value will not be changed. Failing this adjustment,
+any attempt to set a field to a bad value (validation failure) will throw an error. 
+
+If you don't throw on validation errors you will probably want to use `addIsValid()` to get
+the status of an instance. 
+
 ## Dependencies
 
-This class 
+This class depends on the `is` module for tests. You don't need to use the is methods for 
+your validators - you can always write your own failsWhen functions longhand. 

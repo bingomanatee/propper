@@ -126,7 +126,7 @@ Validator.compound = (...validators) => {
   const g = compact(validators);
   let validator = NonValidator;
   for (let i = 0; i < g.length; ++i) {
-    if (is.string(g[i])) {
+    if (is.string(g[i]) || is.function(g[i])) {
       g[i] = new Validator(g[i]);
     }
   }

@@ -144,10 +144,10 @@ export default class Propper {
     return this.addProp(name, overrides);
   }
 
-  addProp(name, overrides = {}) {
+  addProp(name, options = {}) {
     let localName = null;
 
-    const definition = Object.assign({}, PROP_DEFAULTS, overrides);
+    const definition = Object.assign({}, options);
     // optionally the initial value is set with a function to ensure unique references
     localName = getOff(definition, 'localName', `_${name}`);
 

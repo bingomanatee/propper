@@ -1,7 +1,8 @@
-// import util from 'util';
+import util from 'util';
 import is from 'is';
 
 import Propper from './Propper';
+import Validator from './Validator';
 
 /**
  * This class lets you define properties using magic methods
@@ -21,9 +22,14 @@ export default (classDef) => {
         if (ADD_RE.test(name)) {
           const match = ADD_RE.exec(name);
           const testName = match[1].toLowerCase();
-          const failsWhen = v => !is[testName](v);
+          let failsWhen = new Validator(v => !is[testName](v));
           target[name] = function dynamicAddProp(propName, options) {
             if (!options) options = {};
+            if (options.failsWhen) {
+              const optionsFailsWhen = new Validator(options.failsWhen, options.errorMessage);
+              delete options.errorMessage;
+              failsWhen = Validator.compound(failsWhen, optionsFailsWhen);
+            }
             options.failsWhen = failsWhen;
             return this.addProp(propName, options);
           };

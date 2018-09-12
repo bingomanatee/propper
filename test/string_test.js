@@ -29,6 +29,33 @@ describe('Propper', () => {
     });
 
 
+    describe('with regex', () => {
+      let instance;
+      beforeEach(() => {
+        const myPropper = propper(classDef);
+        myPropper.addString('phoneNumber', {
+          regex: /^\d{3}-\d{3}-\d{4}$/,
+          regexErrorMessage: 'phoneNumber must be in the form "ddd-ddd-dddd"',
+        });
+
+        instance = new classDef();
+      });
+      it('should allow good strings', () => {
+        instance.phoneNumber = '111-222-3333';
+
+        expect(instance.phoneNumber).toEqual('111-222-3333');
+      });
+
+      it('should fail bad strings', () => {
+        expect.assertions(1);
+        try {
+          instance.phoneNumber = '1234567890';
+        } catch (err) {
+          expect(err.message).toEqual('phoneNumber must be in the form "ddd-ddd-dddd"');
+        }
+      });
+    });
+
     describe('with min', () => {
       let instance;
       beforeEach(() => {
