@@ -86,24 +86,24 @@ call except for the Propper-specific values:
 These properties define the validation requirement of the field, and how invalid data is handled:
 They are all optional. 
 
-* __failsWhen__
+* __failsWhen__ see validation, below
 * __errorMessage__ 
-* __onBadData__
-* __required__
+* __onBadData__ (function) triggered when invalid data is assigned to a field. if absent, throws 
+* __required__ (boolean)
 
 These do other things:
 
 * __defaultValue__
-* __localName__
+* __localName__ (string) name of the local prop the data is stored in; defaults to '_' + name
 
 `addString(name, options)` is the same as addProp but adds a string validator as well
 as a few more optional validations specific to strings. 
 These are used in addString a variant of addProp
 
-* __regex__
-* __regexErrorMessage__
-* __min__
-* __max__
+* __regex__ (regex)
+* __regexErrorMessage__ (string)
+* __min__ (number) a length criteria for the value
+* __max__ (number) " "
 
 These methods are chainable.
 
