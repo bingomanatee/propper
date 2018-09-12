@@ -1,5 +1,6 @@
-This is a utility for creating class properties with optional validation, type criteria, regex filters, etc. 
-It is middleware for Object.createProperty. 
+This is a utility for creating class properties with optional validation, 
+type criteria, regex filters, etc. 
+It is middleware for Object.createProperty on an es6 Class prototype. 
 
 field validation in OOP is a bit tedious; you have to define rules 
 for a field, define an overall validator for the instance and 
