@@ -2,13 +2,6 @@ import is from 'is';
 
 import Validator from './Validator';
 
-// const NAME_REGEX = /^[\w$]+$/;
-
-const PROP_DEFAULTS = {
-  configurable: false,
-  enumerable: true,
-};
-
 const GENERIC_FAIL_MSG = '(#name#) passed bad value #value#';
 
 const defaultOnBadData = (name, value, error) => {
@@ -19,7 +12,7 @@ const defaultOnBadData = (name, value, error) => {
 };
 
 const popObject = (obj, field, def) => {
-  if (Reflect.has(obj, field)) {
+  if (field in obj) {
     const out = obj[field];
     delete obj[field];
     return out;
@@ -165,6 +158,7 @@ export default class Propper {
     const onBadData = popObject(definition, 'onBadData', defaultOnBadData);
     const defaultValue = popObject(definition, 'defaultValue', null);
     const required = popObject(definition, 'required');
+    const onChange = popObject(definition, 'onChange');
 
     let getDefault = () => defaultValue;
     if (is.function(defaultValue)) {
@@ -193,7 +187,7 @@ export default class Propper {
       try {
         validator = Validator.compound(validator, rv);
       } catch (err) {
-        console.log('bad validator attempt:', rv, validator, this, overrides);
+        console.log('bad validator attempt:', rv, validator, this);
       }
     }
 
@@ -206,6 +200,14 @@ export default class Propper {
           if (error) {
             onBadData(name, value, error);
           } else {
+            if (this[localName] === value) return;
+            if (onChange) {
+              if (typeof onChange === 'string') {
+                this[onChange](value, this[localName], name);
+              } else {
+                onChange.call(this, value, this[localName], name);
+              }
+            }
             this[localName] = value;
           }
         },
@@ -218,6 +220,14 @@ export default class Propper {
       //    console.log('no validator');
       Object.assign(definition, {
         set(value) {
+          if (this[localName] === value) return;
+          if (onChange) {
+            if (typeof onChange === 'string') {
+              this[onChange](value, this[localName], name);
+            } else {
+              onChange.call(this, value, this[localName], name);
+            }
+          }
           this[localName] = value;
         },
       });

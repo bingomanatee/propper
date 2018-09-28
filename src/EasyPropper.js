@@ -1,4 +1,3 @@
-import util from 'util';
 import is from 'is';
 
 import Propper from './Propper';
