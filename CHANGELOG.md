@@ -6,7 +6,7 @@ added an `onChange` property to listen into 'set' calls
 
 adding metadata to package.json for NPM
 
-## 1.0.4
+## 1.0.5
 
 adding a type property for more semantic type checking
 executing onBadData in the context of the class
