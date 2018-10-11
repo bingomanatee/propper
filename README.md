@@ -119,11 +119,13 @@ the class designer's responsibility to either (a) set a default that is valid or
 Validation is at the core of this library. Each property that has tests is assigned a validator 
 instance. Validators have three properties:
 
-* `failsWhen`: a function, validator, string (name of `is` method) OR an array of same.
+* `type`: a string (name of `is` method) that enforces a type check for the field. ('string', 'integer', 'array'...)
+* `failsWhen`: a function, validator OR an array of same.
 * `defaultError`: a string that is emitted when the failsWhen succeeds
 * `errors` (optional): an optional hash of responses to specific emissions from `failsWhen`
 
-Eventually you'll want to execute multiple tests on the same property. There are two ways to do this:
+Eventually you'll want to execute multiple tests on the same property. 
+There are two ways to do this:
 
 1. Create a `failsWhen` that has multiple tests inside it and emits keys 
    that have analogs in the `errors` property
@@ -223,9 +225,9 @@ class BaseClass {
 }
 
 const bcPropper = propper(BaseClass)
-.addProp('created', {failsWhen: 'date'})
-.addProp('name', {failsWhen: 'string', required: true})
-.addProp('age', {failsWhen: 'integer'});
+.addProp('created', {type: 'date'})
+.addProp('name', {type: 'string', required: true})
+.addProp('age', {type: 'integer'});
 
 let instance = new BaseClass();
 
@@ -309,8 +311,9 @@ addString('address')
 
 There may be reasons not to throw an error; if you want to handle bad data in a custom way,
 add an `onBadData` method; it will receive the name of the field, the value attempted, 
-and the error message. The field value will not be changed. Failing this adjustment,
-any attempt to set a field to a bad value (validation failure) will throw an error. 
+and the error message. The field value will not be changed, unless your custom onBadData
+returns true. In the absence of a custom `onBadData` hook, 
+any attempt to set a field to a bad value (validation/type failure) will throw an error. 
 
 If you don't throw on validation errors you will probably want to use `addIsValid()` to get
 the status of an instance. 

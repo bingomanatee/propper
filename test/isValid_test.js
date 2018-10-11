@@ -21,8 +21,8 @@ describe('Propper', () => {
       beforeEach(() => myPropper = propper(classDef)
         .addIsValid()
         .addString('name', { required: true })
-        .addProp('age', { failsWhen: Validator.compound('integer', new Validator(n => n < 18, 'must be at least 18')) })
-        .addProp('male', { failsWhen: 'boolean', defaultValue: null }));
+        .addProp('age', { type: 'integer', failsWhen: new Validator(n => n < 18, 'must be at least 18') })
+        .addProp('male', { type: 'boolean', defaultValue: null }));
 
       it('should start invalid', () => {
         const bob = new classDef();
@@ -44,15 +44,14 @@ describe('Propper', () => {
         .addIsValid()
         .addString('name', { required: true })
         .addProp('age', { failsWhen: Validator.compound('integer', new Validator(n => n < 18, 'must be at least 18')) })
-        .addProp('male', { failsWhen: 'boolean', defaultValue: null }));
-
+        .addProp('male', { type: 'boolean', defaultValue: null }));
 
       it('should start invalid', () => {
         const bob = new classDef();
 
         expect(bob.propErrors).toEqual([{ error: 'name is required', prop: 'name' },
           { error: 'bad value', prop: 'age' },
-          { error: '(male) passed bad value null', prop: 'male' }]);
+          { error: 'male must be a boolean', prop: 'male' }]);
       });
 
       it('should be valid with good data', () => {

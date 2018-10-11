@@ -151,9 +151,10 @@ export default class Propper {
     // optionally the initial value is set with a function to ensure unique references
     localName = popObject(definition, 'localName', `_${name}`);
 
-    let validator = this._validator;
+    let validator = this._validator || null;
 
     const failsWhen = popObject(definition, 'failsWhen');
+    const type = popObject(definition, 'type');
     const errorMessage = popObject(definition, 'errorMessage', GENERIC_FAIL_MSG).replace('#name#', name);
     const onBadData = popObject(definition, 'onBadData', defaultOnBadData);
     const defaultValue = popObject(definition, 'defaultValue', null);
@@ -171,6 +172,10 @@ export default class Propper {
       } else {
         validator = Validator.compound(validator, new Validator(failsWhen, errorMessage));
       }
+    }
+
+    if (type) {
+      validator = Validator.compound(validator, new Validator(type, `${name} must be a ${type}`));
     }
 
     Object.assign(definition, {
@@ -192,24 +197,26 @@ export default class Propper {
     }
 
     if (validator) {
-      // console.log('with validator');
       Object.assign(definition, {
         set(value) {
-          //  console.log(name, 'trying', value, 'with', validator);
           const error = validator.try(value);
           if (error) {
-            onBadData(name, value, error);
-          } else {
-            if (this[localName] === value) return;
-            if (onChange) {
-              if (typeof onChange === 'string') {
-                this[onChange](value, this[localName], name);
-              } else {
-                onChange.call(this, value, this[localName], name);
-              }
+            if (!(onBadData.bind(this))(name, value, error)) {
+              return;
             }
-            this[localName] = value;
           }
+
+          if (this[localName] === value) {
+            return;
+          }
+          if (onChange) {
+            if (typeof onChange === 'string') {
+              this[onChange](value, this[localName], name);
+            } else {
+              onChange.call(this, value, this[localName], name);
+            }
+          }
+          this[localName] = value;
         },
       });
 
@@ -220,7 +227,9 @@ export default class Propper {
       //    console.log('no validator');
       Object.assign(definition, {
         set(value) {
-          if (this[localName] === value) return;
+          if (this[localName] === value) {
+            return;
+          }
           if (onChange) {
             if (typeof onChange === 'string') {
               this[onChange](value, this[localName], name);

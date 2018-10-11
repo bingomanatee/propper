@@ -50,7 +50,7 @@ describe('Propper', () => {
     beforeEach(() => {
       const myPropper = propper(classDef);
       myPropper.addProp('foo', {
-        failsWhen: 'date', errorMessage: 'foo must be a date',
+        type: 'date', errorMessage: 'foo must be a date',
       });
       instance = new classDef();
     });
