@@ -16,4 +16,4 @@ allowing bad data to be set if onBadData returns true.
 
 exporting validation functionality to a separate library, 
 `@wonderlandlabs/inspector`; importing into `@wonderlandlabs/propper`
-
+complete rebuild 
