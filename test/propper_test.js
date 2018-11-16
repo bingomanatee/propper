@@ -76,6 +76,75 @@ describe('Propper', () => {
       });
     });
 
+    describe('type', () => {
+      it('should accept a type', () => {
+        expect.assertions(2);
+
+        propper(MyClass).addProp('count', { type: 'number' });
+        const i = new MyClass();
+
+        i.count = 3;
+        expect(i.count).toEqual(3);
+
+        try {
+          i.count = 'three';
+          console.log('i:', i);
+        } catch (err) {
+          expect(err.message).toEqual('not an number');
+        }
+      });
+
+      it('should accept a type and other tests', () => {
+        expect.assertions(3);
+
+        propper(MyClass).addProp('count', {
+          type: 'number',
+          tests: [
+            [a => a >= 0, false, 'less than 0'],
+          ],
+        });
+        const i = new MyClass();
+
+        i.count = 3;
+        expect(i.count).toEqual(3);
+
+        try {
+          i.count = 'three';
+        } catch (err) {
+          expect(err.message).toEqual('not an number,less than 0');
+        }
+
+        try {
+          i.count = -2;
+          console.log('i = ', i);
+        } catch (err) {
+          expect(err.message).toEqual('less than 0');
+        }
+      });
+    });
+
+    describe('onInvalid', () => {
+      it('should handle bad data according to the invalid handler', () => {
+        const errors = [];
+        propper(MyClass).addProp('count', {
+          tests: [
+            [a => a >= 0, false, 'less than 0'],
+          ],
+          onInvalid(...args) {
+            errors.push(args);
+          },
+        });
+
+        const i = new MyClass();
+
+        i.count = 2;
+
+        expect(errors).toEqual([]);
+
+        i.count = -2;
+        expect(errors).toEqual([[-2, ['less than 0']]]);
+      });
+    });
 
     describe('onChange', () => {
       let values = [];

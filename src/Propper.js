@@ -11,6 +11,12 @@ const DEFAULT_DEFAULTS = name => ({
   },
 });
 
+const throwOnInvalid = (value, error) => {
+  const err = new Error(error);
+  err.value = value;
+  throw err;
+};
+
 class Propper {
   constructor(BaseClass, options = {}, defaults = DEFAULT_DEFAULTS) {
     Object.assign(this, options);
@@ -25,14 +31,10 @@ class Propper {
     const required = popObject(def, 'required', null);
     const onChange = popObject(def, 'onChange');
     const enumerable = popObject(def, 'enumerable', false);
-    let onInvalid = popObject(def, 'onInvalid');
+    let onInvalid = popObject(def, 'onInvalid', throwOnInvalid);
 
     if (onInvalid === 'throw') {
-      onInvalid = (value, error) => {
-        const err = new Error(error);
-        err.value = value;
-        throw err;
-      };
+      onInvalid = throwOnInvalid;
     }
 
     const defaultValue = popObject(def, 'defaultValue', null);
@@ -53,7 +55,7 @@ class Propper {
           break;
 
         default:
-          validation = false;
+          validation = validator(tests, {});
       }
     }
 
