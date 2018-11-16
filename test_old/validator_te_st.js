@@ -1,4 +1,3 @@
-import is from 'is';
 import { Validator } from '../src/index';
 
 describe('Propper', () => {
@@ -35,6 +34,40 @@ describe('Propper', () => {
         expect(compoundTest.try(2)).toBeFalsy();
         expect(compoundTest.try('two')).toEqual(NON_INT_ERROR);
         expect(compoundTest.try(-2)).toEqual(NOT_NEGATIVE_ERROR);
+      });
+    });
+
+    describe('is/object test', () => {
+      let objValidator;
+      beforeEach(() => {
+        objValidator = new Validator('object', 'value must be a object');
+      });
+
+      it('should pass an object', () => {
+        expect(objValidator.try({ a: 1 })).toBeFalsy();
+      });
+
+      it('should fail a number', () => {
+        expect(objValidator.try(1)).toEqual('value must be a object');
+      });
+
+      it('should fail a null', () => {
+        expect(objValidator.try(null)).toEqual('value must be a object');
+      });
+    });
+
+    describe('is/number test', () => {
+      let numValidator;
+      beforeEach(() => {
+        numValidator = new Validator('number', 'value must be a number');
+      });
+
+      it('passes number', () => {
+        expect(numValidator.try(4)).toBeFalsy();
+      });
+
+      it('fails array', () => {
+        expect(numValidator.try([])).toEqual('value must be a number');
       });
     });
 

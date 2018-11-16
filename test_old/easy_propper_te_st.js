@@ -15,7 +15,8 @@ describe('Propper', () => {
   describe('easyPropper', () => {
     it('should provide a JIT shim for date props', () => {
       expect.assertions(2);
-      const myEPropper = easyPropper(classDef);
+      const myEPropper = easyPropper(classDef)
+        .addIsValid();
 
       myEPropper.addDate('started');
 
@@ -28,6 +29,7 @@ describe('Propper', () => {
 
       try {
         instance.started = 3;
+        console.log('----------- propErrors: ', instance.propErrors);
       } catch (err) {
         expect(err.message).toEqual('bad value');
       }

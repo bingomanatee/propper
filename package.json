@@ -1,5 +1,5 @@
 {
-  "name": "class-propper",
+  "name": "@wonderlandlabs/propper",
   "version": "1.0.5",
   "main": "build/index.js",
   "license": "MIT",
@@ -16,13 +16,14 @@
     "simple-node-logger": "^0.93.40"
   },
   "dependencies": {
+    "@wonderlandlabs/inspector": "^1.0.2",
     "is": "^3.2.1",
     "lodash.compact": "^3.0.1",
     "lodash.get": "^4.4.2"
   },
   "homepage": "https://github.com/bingomanatee/propper",
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/bingomanatee/propper.git"
+    "type": "git",
+    "url": "https://github.com/bingomanatee/propper.git"
   }
 }

@@ -1,8 +1,8 @@
 /* eslint-disable babel/new-cap */
-import propper from './../src/index';
+import propper, { Propper } from './../src/index';
 
 describe('Propper', () => {
-  let classDef;
+  let MyClass;
 
   beforeEach(() => {
     class GenericClass {
@@ -14,107 +14,107 @@ describe('Propper', () => {
       get changes() { return this._changes || []; }
     }
 
-    classDef = GenericClass;
+    MyClass = GenericClass;
   });
 
   describe('constructor', () => {
     it('should create a Propper', () => {
-      const myPropper = propper(classDef);
-
-      expect(myPropper.IDENTITY).toEqual('PROPPER');
+      const p = new Propper(MyClass);
+      expect(p.BaseClass).toEqual(MyClass);
     });
   });
 
   describe('addProp', () => {
     it('should add a writable property to a class', () => {
-      // not much of a failsWhen - just making sure no explosions
+      propper(MyClass)
+        .addProp('title');
 
-      const myPropper = propper(classDef);
-
-      myPropper.addProp('foo');
-      const instance = new classDef();
-      instance.foo = 2;
-
-      expect(instance.foo).toEqual(2);
+      const i = new MyClass();
+      i.title = 'foo';
+      expect(i.title).toEqual('foo');
     });
 
-    it('should accept a required flag', () => {
-      expect.assertions(2);
-      const myPropper = propper(classDef);
+    describe('required', () => {
+      it('should allow a value that is truthy', () => {
+        propper(MyClass)
+          .addProp('title', { required: true, onInvalid: 'throw' });
 
-      myPropper.addProp('foo', { required: true });
-      myPropper.addProp('bar', { required: true });
+        const i = new MyClass();
+        i.title = 'Fred';
+        expect(i.title).toEqual('Fred');
+      });
 
-      const instance = new classDef();
-      instance.foo = 2;
+      it('should fail a bad value', () => {
+        propper(MyClass)
+          .addProp('title', { required: true, onInvalid: 'throw' });
 
-      expect(instance.foo).toEqual(2);
-
-      try {
-        instance.bar = null;
-      } catch (err) {
-        expect(err.message).toEqual('bar is required');
-      }
+        expect.assertions(1);
+        try {
+          const i = new MyClass();
+          i.title = '';
+        } catch (err) {
+          expect(err.message).toEqual('required');
+        }
+      });
     });
 
-    it('should reflect an initial value', () => {
-      const myPropper = propper(classDef);
+    describe('initialValue', () => {
+      beforeEach(() => {
+        propper(MyClass).addProp('count', { defaultValue: 0 });
+      });
 
-      myPropper.addProp('foo', { defaultValue: 1 });
-      const instance = new classDef();
+      it('should reflect an initial value', () => {
+        const i = new MyClass();
 
-      expect(instance.foo).toEqual(1);
+        expect(i.count).toEqual(0);
+      });
 
-      instance.foo = 2;
-
-      expect(instance.foo).toEqual(2);
+      it('should update normally', () => {
+        const i = new MyClass();
+        i.count = 2;
+        expect(i.count).toEqual(2);
+      });
     });
 
-    it('should accept an initial value factory', () => {
-      const myPropper = propper(classDef);
 
-      myPropper.addProp('foo', { defaultValue: () => [1, 2] });
-      const instance = new classDef();
+    describe('onChange', () => {
+      let values = [];
 
-      expect(instance.foo).toEqual([1, 2]);
-
-      instance.foo[0] = 2;
-
-      expect(instance.foo).toEqual([2, 2]);
-      // make sure the reference to the array is unique to the instance
-
-      const instance2 = new classDef();
-
-      expect(instance2.foo).toEqual([1, 2]); // change to instance2 not propogatyed to instance...
-      instance2[0] = 3;
-      expect(instance.foo).toEqual([2, 2]); // and vice versa
-    });
-
-    it('should accept an onChange hook', () => {
-      const myPropper = propper(classDef);
-      myPropper.addProp('foo', { onChange: 'change' });
-
-      const instance = new classDef();
-
-      expect(instance.changes).toEqual([]);
-
-      instance.foo = 2;
-      expect(instance.foo).toEqual(2);
-      expect(instance.changes).toEqual([[2, undefined, 'foo']]);
+      beforeEach(() => {
+        values = [];
+        propper(MyClass).addProp('feet', {
+          // eslint-disable-next-line object-shorthand
+          onChange: function (value) {
+            values.push(value);
+            this.inches = 12 * value;
+          },
+        });
+      });
+      it('should accept an onChange hook', () => {
+        const i = new MyClass();
+        i.feet = 2;
+        expect(values).toEqual([2]);
+        expect(i.inches).toEqual(24);
+      });
     });
 
     it('should accept an onChange hook with a default', () => {
-      const myPropper = propper(classDef);
-      myPropper.addProp('foo', { onChange: 'change', defaultValue: 0 });
+      const changes = [];
+      propper(MyClass).addProp('foo', {
+        // eslint-disable-next-line object-shorthand
+        onChange: function (...args) {
+          changes.push(args);
+        },
+        defaultValue: 0,
+      });
 
-      const instance = new classDef();
+      const instance = new MyClass();
 
-      expect(instance.changes).toEqual([]);
+      expect(changes).toEqual([]);
       expect(instance.foo).toEqual(0);
-
       instance.foo = 2;
       expect(instance.foo).toEqual(2);
-      expect(instance.changes).toEqual([[2, 0, 'foo']]);
+      expect(changes).toEqual([[2, 0]]);
     });
   });
 });

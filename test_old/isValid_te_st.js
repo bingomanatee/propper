@@ -24,6 +24,8 @@ describe('Propper', () => {
     describe('isValid', () => {
       let myPropper;
 
+Prop('male', { type: 'boolean', defaultValue: null }));
+
       it('should start invalid', () => {
 
       });
@@ -34,7 +36,10 @@ describe('Propper', () => {
     });
 
     describe('required/object', () => {
+
+
       it('should reject a missing name', () => {
+        const bob = new classDef();
 
       });
 
@@ -44,6 +49,8 @@ describe('Propper', () => {
     });
 
     describe('not required/object', () => {
+
+
       it('should accept a missing name', () => {
 
       });
@@ -54,7 +61,6 @@ describe('Propper', () => {
     });
 
     describe('propErrors', () => {
-      let myPropper;
 
       it('should start invalid', () => {
 

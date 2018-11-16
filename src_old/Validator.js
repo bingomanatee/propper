@@ -12,13 +12,13 @@ class Validator {
    * is returned; so your failsWhen can key one of many errors if it wants to.
    * otherwise (if errors doesn't contain result) it returns defaultError.
    *
-   * @param test {function | string}
+   * @param failsWhen {function | string}
    * @param defaultError {string}
    * @param errors {Object}
    */
-  constructor(test, defaultError = 'bad value', errors = {}) {
+  constructor(failsWhen, defaultError = 'bad value', errors = {}) {
     this.errors = errors;
-    this.failsWhen = test;
+    this.failsWhen = failsWhen;
     this.defaultError = defaultError;
   }
 
