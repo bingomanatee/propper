@@ -6,12 +6,6 @@ describe('Propper', () => {
 
   beforeEach(() => {
     class GenericClass {
-      change(...args) {
-        if (!this._changes) this._changes = [];
-        this._changes.push(args);
-      }
-
-      get changes() { return this._changes || []; }
     }
 
     MyClass = GenericClass;
@@ -111,7 +105,7 @@ describe('Propper', () => {
         try {
           i.count = 'three';
         } catch (err) {
-          expect(err.message).toEqual('not an number,less than 0');
+          expect(err.message).toEqual('not an number');
         }
 
         try {
@@ -120,6 +114,45 @@ describe('Propper', () => {
         } catch (err) {
           expect(err.message).toEqual('less than 0');
         }
+      });
+
+      describe('should not execute tests if type fails', () => {
+        let regexTestHit;
+        let errors = [];
+
+        beforeEach(() => {
+          regexTestHit = 0;
+          errors = [];
+          propper(MyClass).addProp('phoneNumber', {
+            type: 'string',
+            onInvalid: (...args) => errors.push(args),
+            tests: [
+              [(value) => {
+                regexTestHit += 1;
+                return /[\d]{3}-[\d]{3}-[\d]{4}/.test(value);
+              },
+              false,
+              'bad phone number',
+              ],
+            ],
+          });
+        });
+
+        it('hits regex with a string', () => {
+          const goodNumber = new MyClass();
+
+          goodNumber.phoneNumber = '111-204-34534';
+
+          expect(regexTestHit).toEqual(1);
+          expect(errors).toEqual([]);
+        });
+
+        it('doesnt hit regex with a number', () => {
+          const goodNumber = new MyClass();
+          goodNumber.phoneNumber = 4;
+
+          expect(regexTestHit).toEqual(0);
+        });
       });
     });
 

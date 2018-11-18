@@ -211,11 +211,12 @@
     deepmerge "^1.5.2"
     optimize-css-assets-webpack-plugin "^3.2.0"
 
-"@wonderlandlabs/inspector@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@wonderlandlabs/inspector/-/inspector-1.0.2.tgz#ec17fb50e95c533a50a50f828f1c0390610c30a6"
-  integrity sha512-Bvw/uaKPw+f6Ht3a2K3boTn+h3jmI/NiFffspJ1N+e6P1Ds0zGiyLq1iWOl9SgmJNBadY5sbyrNZq1HEWnCFbQ==
+"@wonderlandlabs/inspector@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@wonderlandlabs/inspector/-/inspector-1.0.4.tgz#6fdea4907be78a039c36d5486f2a9cfa0bd997d2"
+  integrity sha512-EuF+ZtfM4fcuGZoke8fulzBi1eCZBzxN258fnHkxnfOEuQQlfgdsF3UrfYYM7ectDjhcyWCymaUc/2moUYI8JQ==
   dependencies:
+    bottlejs "^1.7.1"
     is "^3.2.1"
 
 abab@^1.0.3:
@@ -1368,6 +1369,11 @@ bonjour@^3.5.0:
 boolbase@^1.0.0, boolbase@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/boolbase/-/boolbase-1.0.0.tgz#68dff5fbe60c51eb37725ea9e3ed310dcc1e776e"
+
+bottlejs@^1.7.1:
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/bottlejs/-/bottlejs-1.7.1.tgz#f2673c42feb2ba092d94b8add390e66b3f7d948f"
+  integrity sha512-OUex4/uBgIyanzPpMzie5NfMfjJ23Z1mUy8ZC6omFBPwExMeoSrwyndlaZW0tci0unMH2LVfNn+jwDPRQLPncw==
 
 brace-expansion@^1.1.7:
   version "1.1.11"

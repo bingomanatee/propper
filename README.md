@@ -12,7 +12,7 @@ meta-methods.
 
 The basic workflow is this:
 
-1. `Define a class`
+1. Define a class
 
 Your class (es6) can have any sort of constructor, properties, methods, etc. 
 
@@ -20,9 +20,7 @@ Your class (es6) can have any sort of constructor, properties, methods, etc.
 
 class UserRecord {
   constructor(props) {
-    for (let prop in props) {
-      this[prop] = props[prop];
-    }
+    Object.assign(this, props);
   }
   
   get name() {
