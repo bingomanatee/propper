@@ -22,6 +22,6 @@ complete rebuild
 
 adopted inspector 1.0.4
 
-## 2.0.2
+## 2.0.3
 
 ensured onChange is called after value set

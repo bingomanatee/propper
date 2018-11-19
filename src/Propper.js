@@ -1,5 +1,5 @@
 import Is from 'is';
-import inspector, { validator } from '@wonderlandlabs/inspector';
+import { validator } from '@wonderlandlabs/inspector';
 import { compact, popObject } from './utils';
 
 const DEFAULT_DEFAULTS = name => ({
@@ -20,13 +20,13 @@ const throwOnInvalid = (value, error) => {
 class Propper {
   constructor(BaseClass, options = {}, defaults = DEFAULT_DEFAULTS) {
     Object.assign(this, options);
-    this.defaults = {};
+    this.defaults = defaults;
     this.BaseClass = BaseClass;
   }
 
   addProp(name, options = {}) {
-    const defaults = Is.function(this.defaults) ? this.defaults(name) : this.defaults || {};
-    const def = { ...defaults, ...options };
+    const defaults = Is.function(this.defaults) ? this.defaults(name, options) : this.defaults;
+    const def = Object.assign({}, defaults || {}, options);
     const tests = compact([popObject(def, 'type', null), ...(popObject(def, 'tests', []))]);
     const required = popObject(def, 'required', null);
     const onChange = popObject(def, 'onChange');
@@ -117,8 +117,8 @@ class Propper {
     return this;
   }
 
-  set defaults(value) {
-    this._defaults = { ...(value || {}) };
+  set defaults(value = {}) {
+    this._defaults = Object.assign({}, value);
   }
 
   get defaults() {
