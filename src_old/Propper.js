@@ -221,6 +221,7 @@ export default class Propper {
           if (this[localName] === value) {
             return;
           }
+          this[localName] = value;
           if (onChange) {
             if (typeof onChange === 'string') {
               this[onChange](value, this[localName], name);
@@ -228,7 +229,6 @@ export default class Propper {
               onChange.call(this, value, this[localName], name);
             }
           }
-          this[localName] = value;
         },
       });
 
@@ -242,6 +242,7 @@ export default class Propper {
           if (this[localName] === value) {
             return;
           }
+          this[localName] = value;
           if (onChange) {
             if (typeof onChange === 'string') {
               this[onChange](value, this[localName], name);
@@ -249,7 +250,6 @@ export default class Propper {
               onChange.call(this, value, this[localName], name);
             }
           }
-          this[localName] = value;
         },
       });
     }
