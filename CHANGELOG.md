@@ -26,6 +26,6 @@ adopted inspector 1.0.4
 
 ensured onChange is called after value set
 
-## 2.0.4
+## 2.0.5
 
 adding name of field to error messages
