@@ -125,8 +125,8 @@ class Propper {
     return this;
   }
 
-  set defaults(value = {}) {
-    this._defaults = Object.assign({}, value);
+  set defaults(value) {
+    this._defaults = Object.assign({}, value || {});
   }
 
   get defaults() {
