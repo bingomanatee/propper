@@ -97,8 +97,16 @@ class Propper {
               return;
             }
           }
-          const error = validation(value);
+          let error = validation(value);
           if (error) {
+            if (Is.string(error)) {
+              error = `${name} error`;
+            } else if (Is.array(error)) {
+              error = error.map((a) => {
+                if (Is.string(a)) return `${name} ${a}`;
+                return a;
+              });
+            }
             onInvalid(value, error);
             return;
           }

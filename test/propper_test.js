@@ -47,7 +47,7 @@ describe('Propper', () => {
           const i = new MyClass();
           i.title = '';
         } catch (err) {
-          expect(err.message).toEqual('required');
+          expect(err.message).toEqual('title required');
         }
       });
     });
@@ -84,7 +84,7 @@ describe('Propper', () => {
           i.count = 'three';
           console.log('i:', i);
         } catch (err) {
-          expect(err.message).toEqual('not an number');
+          expect(err.message).toEqual('count not an number');
         }
       });
 
@@ -105,14 +105,14 @@ describe('Propper', () => {
         try {
           i.count = 'three';
         } catch (err) {
-          expect(err.message).toEqual('not an number');
+          expect(err.message).toEqual('count not an number');
         }
 
         try {
           i.count = -2;
           console.log('i = ', i);
         } catch (err) {
-          expect(err.message).toEqual('less than 0');
+          expect(err.message).toEqual('count less than 0');
         }
       });
 
@@ -175,7 +175,7 @@ describe('Propper', () => {
         expect(errors).toEqual([]);
 
         i.count = -2;
-        expect(errors).toEqual([[-2, ['less than 0']]]);
+        expect(errors).toEqual([[-2, ['count less than 0']]]);
       });
     });
 
